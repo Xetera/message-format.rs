@@ -113,10 +113,9 @@ impl MessagePart for PluralFormat {
         &self,
         ctx: &Context,
         stream: &mut dyn fmt::Write,
-        args: Option<&Args<'f>>,
+        args: &'f dyn Args<'f>,
     ) -> fmt::Result {
-        let arg = args.and_then(|args| args.get(&self.variable_name));
-        if let Some(&Value::Number(value)) = arg.map(|a| a.value()) {
+        if let Some(&Value::Number(value)) = args.get(&self.variable_name) {
             let offset_value = value - self.offset;
             let message = self.lookup_message(offset_value);
             let ctx = Context {

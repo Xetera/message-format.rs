@@ -24,7 +24,7 @@ impl MessagePart for PlaceholderFormat {
         &self,
         ctx: &Context,
         stream: &mut dyn fmt::Write,
-        _args: Option<&Args>,
+        _args: &dyn Args,
     ) -> fmt::Result {
         if let Some(value) = ctx.placeholder_value {
             write!(stream, "{}", value)?;

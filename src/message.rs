@@ -35,7 +35,7 @@ impl Message {
         &self,
         ctx: &Context,
         stream: &mut dyn fmt::Write,
-        args: Option<&Args<'f>>,
+        args: &'f dyn Args<'f>,
     ) -> fmt::Result {
         for part in &self.parts {
             part.apply_format(ctx, stream, args)?

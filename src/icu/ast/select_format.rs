@@ -58,10 +58,10 @@ impl MessagePart for SelectFormat {
         &self,
         ctx: &Context,
         stream: &mut dyn fmt::Write,
-        args: Option<&Args<'f>>,
+        args: &'f dyn Args<'f>,
     ) -> fmt::Result {
-        let arg = args.and_then(|args| args.get(&self.variable_name));
-        if let Some(&Value::Str(value)) = arg.map(|a| a.value()) {
+        let arg = args.get(&self.variable_name);
+        if let Some(&Value::Str(value)) = arg {
             let message = self.lookup_message(value);
             message.write_message(ctx, stream, args)?;
             Ok(())

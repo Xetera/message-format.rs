@@ -123,6 +123,7 @@
 //! extern crate message_format;
 //!
 //! fn main() {
+//!     use message_format::Args;
 //!     let ctx = message_format::Context::default();
 //!     let m1 = message_format::icu::parse("Connecting to {host}...").unwrap();
 //!     assert_eq!(format_message!(ctx, &m1, host => "localhost"),
@@ -177,7 +178,7 @@ mod plural_category;
 mod plural_classifiers;
 mod value;
 
-pub use self::args::{arg, Args};
+pub use self::args::{arg, Args, ListArgs, EmptyArgs};
 pub use self::context::Context;
 pub use self::message::Message;
 pub use self::message_part::MessagePart;
@@ -188,7 +189,7 @@ pub use self::value::Value;
 #[macro_export]
 macro_rules! format_message {
     ($ctx:expr, $msg:expr) => {
-        $ctx.format($msg, None)
+        $ctx.format($msg, &$crate::EmptyArgs { })
     };
     ($ctx:expr, $msg:expr, $($rest:tt)*) => ({
         use $crate::Value;
@@ -199,7 +200,7 @@ macro_rules! format_message {
 #[macro_export]
 macro_rules! write_message {
     ($ctx:expr, $msg:expr, $stream:expr) => {
-        $ctx.write($msg, $stream, None)
+        $ctx.write($msg, $stream, &$crate::EmptyArgs { })
     };
     ($ctx:expr, $msg:expr, $stream:expr, $($rest:tt)*) => ({
         use $crate::Value;
@@ -210,31 +211,31 @@ macro_rules! write_message {
 #[macro_export]
 macro_rules! message_args_aux {
     ($prev:expr, $name:ident => $value:expr) => {
-        Some(&$crate::Args {
+        &$crate::ListArgs {
             name: stringify!($name),
             value: Value::from($value),
             prev: $prev,
-        })
+        }
     };
     ($prev:expr, $name:ident) => {
-        Some(&$crate::Args {
+        &$crate::ListArgs {
             name: stringify!($name),
             value: Value::from($name),
             prev: $prev,
-        })
+        }
     };
     ($prev:expr, $name:ident, $($rest:tt)*) => {
         message_args_aux!(
-            Some(&$crate::Args {
+            &$crate::ListArgs {
                 name: stringify!($name),
                 value: Value::from($name),
                 prev: $prev,
-            }),
+            },
             $($rest)*)
     };
     ($prev:expr, $name:ident => $value:expr, $($rest:tt)*) => {
         message_args_aux!(
-            Some(&$crate::Args {
+            Some(&$crate::ListArgs {
                 name: stringify!($name),
                 value: Value::from($value),
                 prev: $prev,
@@ -245,24 +246,24 @@ macro_rules! message_args_aux {
 
 #[macro_export]
 macro_rules! message_args {
-    () => { None };
+    () => { /*&$crate::EmptyArgs { }*/ None };
     ($name:ident => $value:expr) => {
-        Some(&$crate::Args {
+        &$crate::ListArgs {
             name: stringify!($name),
             value: Value::from($value),
             prev: None,
-        })
+        }
     };
     ($name:ident) => {
-        Some(&$crate::Args {
+        &$crate::ListArgs {
             name: stringify!($name),
             value: Value::from($name),
             prev: None,
-        })
+        }
     };
     ($name:ident, $($rest:tt)*) => {
         message_args_aux!(
-            Some(&$crate::Args {
+            Some(&$crate::ListArgs {
                 name: stringify!($name),
                 value: Value::from($name),
                 prev: None,
@@ -271,7 +272,7 @@ macro_rules! message_args {
     };
     ($name:ident => $value:expr, $($rest:tt)*) => {
         message_args_aux!(
-            Some(&$crate::Args {
+            Some(&$crate::ListArgs {
                 name: stringify!($name),
                 value: Value::from($value),
                 prev: None,
@@ -349,6 +350,24 @@ mod tests {
         let mut stream = String::new();
         write_message!(ctx, &m, &mut stream, name => "John").unwrap();
         assert_eq!(stream, "John");
+    }
+
+    #[test]
+    fn write_hashmap_args() {
+        use super::{ Value, Args };
+
+        let ctx = Context::default();
+
+        let m = icu::parse("{name} times {count}").unwrap();
+        let mut stream: String = String::new();
+
+        let mut hashmap = std::collections::HashMap::new();
+        hashmap.insert("name", Value::from("John"));
+        hashmap.insert("count", Value::from(3));
+
+        ctx.write(&m, &mut stream, &hashmap).unwrap();
+
+        assert_eq!(stream, "John times 3");
     }
 }
 

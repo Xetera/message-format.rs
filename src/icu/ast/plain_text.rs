@@ -30,7 +30,7 @@ impl MessagePart for PlainText {
         &self,
         _ctx: &Context,
         stream: &mut dyn fmt::Write,
-        _args: Option<&Args>,
+        _args: &dyn Args,
     ) -> fmt::Result {
         stream.write_str(self.text.as_str())?;
         Ok(())

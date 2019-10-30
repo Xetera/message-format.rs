@@ -29,10 +29,11 @@ impl MessagePart for SimpleFormat {
         &self,
         _ctx: &Context,
         stream: &mut dyn fmt::Write,
-        args: Option<&Args<'f>>,
+        args: &'f dyn Args<'f>,
     ) -> fmt::Result {
-        if let Some(arg) = args.and_then(|args| args.get(&self.variable_name)) {
-            write!(stream, "{}", arg.value())?;
+        let arg = args.get(&self.variable_name);
+        if let Some(arg) = arg {
+            write!(stream, "{}", arg)?;
             Ok(())
         } else {
             Err(fmt::Error {})
