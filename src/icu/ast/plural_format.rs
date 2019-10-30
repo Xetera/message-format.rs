@@ -112,7 +112,7 @@ impl MessagePart for PluralFormat {
     fn apply_format<'f>(
         &self,
         ctx: &Context,
-        stream: &mut fmt::Write,
+        stream: &mut dyn fmt::Write,
         args: Option<&Args<'f>>,
     ) -> fmt::Result {
         let arg = args.and_then(|args| args.get(&self.variable_name));
@@ -123,7 +123,7 @@ impl MessagePart for PluralFormat {
                 placeholder_value: Some(offset_value),
                 ..ctx.clone()
             };
-            try!(message.write_message(&ctx, stream, args));
+            message.write_message(&ctx, stream, args)?;
             Ok(())
         } else {
             Err(fmt::Error {})

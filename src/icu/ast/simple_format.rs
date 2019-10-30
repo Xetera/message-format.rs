@@ -28,11 +28,11 @@ impl MessagePart for SimpleFormat {
     fn apply_format<'f>(
         &self,
         _ctx: &Context,
-        stream: &mut fmt::Write,
+        stream: &mut dyn fmt::Write,
         args: Option<&Args<'f>>,
     ) -> fmt::Result {
         if let Some(arg) = args.and_then(|args| args.get(&self.variable_name)) {
-            try!(write!(stream, "{}", arg.value()));
+            write!(stream, "{}", arg.value())?;
             Ok(())
         } else {
             Err(fmt::Error {})

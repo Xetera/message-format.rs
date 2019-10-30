@@ -18,12 +18,12 @@ use {Args, Context, MessagePart};
 /// [`icu::parse`]: icu/fn.parse.html
 #[derive(Debug)]
 pub struct Message {
-    parts: Vec<Box<MessagePart>>,
+    parts: Vec<Box<dyn MessagePart>>,
 }
 
 impl Message {
     /// Construct a message from constituent parts.
-    pub fn new(parts: Vec<Box<MessagePart>>) -> Self {
+    pub fn new(parts: Vec<Box<dyn MessagePart>>) -> Self {
         Message { parts: parts }
     }
 
@@ -34,11 +34,11 @@ impl Message {
     pub fn write_message<'f>(
         &self,
         ctx: &Context,
-        stream: &mut fmt::Write,
+        stream: &mut dyn fmt::Write,
         args: Option<&Args<'f>>,
     ) -> fmt::Result {
         for part in &self.parts {
-            try!(part.apply_format(ctx, stream, args));
+            part.apply_format(ctx, stream, args)?
         }
         Ok(())
     }

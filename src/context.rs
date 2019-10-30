@@ -38,7 +38,7 @@ impl Context {
     pub fn write<'f>(
         &self,
         message: &Message,
-        stream: &mut fmt::Write,
+        stream: &mut dyn fmt::Write,
         args: Option<&Args<'f>>,
     ) -> fmt::Result {
         message.write_message(self, stream, args)

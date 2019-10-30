@@ -23,11 +23,11 @@ impl MessagePart for PlaceholderFormat {
     fn apply_format(
         &self,
         ctx: &Context,
-        stream: &mut fmt::Write,
+        stream: &mut dyn fmt::Write,
         _args: Option<&Args>,
     ) -> fmt::Result {
         if let Some(value) = ctx.placeholder_value {
-            try!(write!(stream, "{}", value));
+            write!(stream, "{}", value)?;
             Ok(())
         } else {
             Err(fmt::Error {})

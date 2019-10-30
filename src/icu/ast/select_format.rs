@@ -57,13 +57,13 @@ impl MessagePart for SelectFormat {
     fn apply_format<'f>(
         &self,
         ctx: &Context,
-        stream: &mut fmt::Write,
+        stream: &mut dyn fmt::Write,
         args: Option<&Args<'f>>,
     ) -> fmt::Result {
         let arg = args.and_then(|args| args.get(&self.variable_name));
         if let Some(&Value::Str(value)) = arg.map(|a| a.value()) {
             let message = self.lookup_message(value);
-            try!(message.write_message(ctx, stream, args));
+            message.write_message(ctx, stream, args)?;
             Ok(())
         } else {
             Err(fmt::Error {})

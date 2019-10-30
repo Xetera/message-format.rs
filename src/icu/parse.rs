@@ -35,19 +35,19 @@ impl fmt::Display for ParseError {
 }
 
 /// Given a name, create a `SimpleFormat`.
-fn mk_simple(name: &str) -> Box<MessagePart> {
+fn mk_simple(name: &str) -> Box<dyn MessagePart> {
     Box::new(ast::SimpleFormat::new(name))
 }
 
-/// This grabs the variable name from a format, which is
-/// the first thing after the '{' and extends to the first
-/// ',' or '}'.
-///
-/// '{name}' has a variable name of 'name'.
+// This grabs the variable name from a format, which is
+// the first thing after the '{' and extends to the first
+// ',' or '}'.
+//
+// '{name}' has a variable name of 'name'.
 named!(variable_name <&str, &str>, is_not_s!(",}"));
 
-/// A simple format has only a name, delimited by braces.
-named!(simple_format <&str, Box<MessagePart> >,
+// A simple format has only a name, delimited by braces.
+named!(simple_format <&str, Box<dyn MessagePart> >,
     map!(
         delimited!(
             tag_s!("{"),
@@ -55,7 +55,7 @@ named!(simple_format <&str, Box<MessagePart> >,
             tag_s!("}")),
         mk_simple));
 
-named!(plural_format <&str, Box<MessagePart> >,
+named!(plural_format <&str, Box<dyn MessagePart> >,
     delimited!(
         tag_s!("{"),
         do_parse!(
@@ -65,7 +65,7 @@ named!(plural_format <&str, Box<MessagePart> >,
             (Box::new(ast::SimpleFormat::new(name)))),
         tag_s!("}")));
 
-named!(select_format <&str, Box<MessagePart> >,
+named!(select_format <&str, Box<dyn MessagePart> >,
     delimited!(
         tag_s!("{"),
         do_parse!(
@@ -75,21 +75,21 @@ named!(select_format <&str, Box<MessagePart> >,
             (Box::new(ast::SimpleFormat::new(name)))),
         tag_s!("}")));
 
-/// Plain text extends up through to the start of the next format
-/// block.
-named!(plain_text <&str, Box<MessagePart> >,
+// Plain text extends up through to the start of the next format
+// block.
+named!(plain_text <&str, Box<dyn MessagePart> >,
     map!(is_not_s!("{"), |text| Box::new(ast::PlainText::new(text))));
 
-/// Message parts must be 1 of the various part types. And there must
-/// be at least one of them for now.
-named!(message_parts <&str, Vec<Box<MessagePart> > >,
+// Message parts must be 1 of the various part types. And there must
+// be at least one of them for now.
+named!(message_parts <&str, Vec<Box<dyn MessagePart> > >,
     many1!(
         alt!(call!(simple_format) |
              call!(plural_format) |
              call!(select_format) |
              call!(plain_text))));
 
-/// Given a set of `MessagePart`s, create a `Message`.
+// Given a set of `MessagePart`s, create a `Message`.
 named!(pub message_parser <&str, Message>,
     map!(message_parts, Message::new));
 

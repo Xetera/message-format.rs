@@ -15,7 +15,7 @@ pub trait MessagePart: fmt::Debug {
     fn apply_format<'f>(
         &self,
         ctx: &Context,
-        stream: &mut fmt::Write,
+        stream: &mut dyn fmt::Write,
         args: Option<&Args<'f>>,
     ) -> fmt::Result;
 }

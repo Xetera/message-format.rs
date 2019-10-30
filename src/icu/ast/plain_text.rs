@@ -29,10 +29,10 @@ impl MessagePart for PlainText {
     fn apply_format(
         &self,
         _ctx: &Context,
-        stream: &mut fmt::Write,
+        stream: &mut dyn fmt::Write,
         _args: Option<&Args>,
     ) -> fmt::Result {
-        try!(stream.write_str(self.text.as_str()));
+        stream.write_str(self.text.as_str())?;
         Ok(())
     }
 }
