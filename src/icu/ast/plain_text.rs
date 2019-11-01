@@ -10,7 +10,7 @@ use {Args, Context, MessagePart};
 
 /// A string that should be output. Used for the text in between
 /// formats.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct PlainText {
     /// The text that should be output.
     text: String,
