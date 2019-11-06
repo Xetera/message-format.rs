@@ -8,7 +8,7 @@ use std::error::Error;
 use std::fmt;
 use std::str;
 
-use nom::character::complete::{ digit1, multispace0 };
+use nom::character::complete::{ alphanumeric1, digit1, multispace0 };
 use nom::bytes::complete::{ tag, is_not, take_while };
 use nom::sequence::delimited;
 use nom::{dbg_dmp, IResult};
@@ -119,16 +119,6 @@ enum PluralPart {
     Other(Message),
 }
 
-named!(plural_submessage <&str, Vec<PluralPart>>,
-    many1!(
-        alt!(
-            call!(plural_literal) |
-            call!(plural_one)     |
-            call!(plural_other)
-        )
-    )
-);
-
 fn plural_from_parts(var_name: &str, mut parts: Vec<PluralPart>) -> ast::PluralFormat {
     // println!("parts = {:?}", parts);
     let other_part_pos = parts.iter().position(|pp| {
@@ -164,6 +154,16 @@ fn plural_from_parts(var_name: &str, mut parts: Vec<PluralPart>) -> ast::PluralF
     fmt
 }
 
+named!(plural_submessage <&str, Vec<PluralPart>>,
+    many1!(
+        alt!(
+            call!(plural_literal) |
+            call!(plural_one)     |
+            call!(plural_other)
+        )
+    )
+);
+
 fn plural_inner(s: &str) -> IResult<&str, Box<dyn MessagePart>> {
     do_parse!(s,
         name: variable_name             >>
@@ -182,21 +182,63 @@ fn plural_format(s: &str) -> IResult<&str,Box<dyn MessagePart>> {
     delimited(
         tag("{"),
         plural_inner,
-        tag("}")
+        tag("}"),
     )(s)
 }
 
-named!(select_format <&str, Box<dyn MessagePart> >,
-    delimited!(
-        tag!("{"),
-        do_parse!(
-            name: variable_name >>
-            tag!(",") >> opt!(multispace0) >>
-            tag!("select") >> opt!(multispace0) >>
-            (Box::new(ast::SimpleFormat::new(name)) as Box<dyn MessagePart>)),
-        tag!("}")
+fn select_match(s: &str) -> IResult<&str, (&str, Message)> {
+    do_parse!(s,
+        multispace0                 >>
+        match_cond: alphanumeric1   >>
+        multispace0                 >>
+        msg: call!(submessage)      >>
+        multispace0                 >>
+        ((match_cond,msg))
     )
-);
+}
+
+fn select_submessage(s: &str) -> IResult<&str, Vec<(&str, Message)>> {
+    many1(select_match)(s)
+}
+
+fn select_inner(s: &str) -> IResult<&str, Box<dyn MessagePart>> {
+    do_parse!(s,
+        name: variable_name             >>
+        call!(tag(","))                 >>
+        call!(opt(multispace0))         >>
+        call!(tag("select"))            >>
+        call!(opt(multispace0))         >>
+        call!(tag(","))                 >>
+        call!(opt(multispace0))         >>
+        parts: call!(select_submessage) >>
+        (Box::new(select_from_parts(name, parts)) as Box<dyn MessagePart>)
+    )
+}
+
+fn select_from_parts(variable_name: &str, mut parts: Vec<(&str, Message)>) -> ast::SelectFormat {
+    let other_part_pos = parts.iter().position(|(n,_)| *n == "other");
+
+    if let Some(other_part_pos) = other_part_pos {
+        let (_,other_part) = parts.remove(other_part_pos);
+        let mut fmt = ast::SelectFormat::new(variable_name, other_part);
+
+        for (s,p) in parts {
+            fmt.map(s, p);
+        }
+
+        fmt
+    } else {
+        panic!("no other part found for select")
+    }
+}
+
+fn select_format(s: &str) -> IResult<&str, Box<dyn MessagePart>> {
+    delimited(
+        tag("{"),
+        select_inner,
+        tag("}"),
+    )(s)
+}
 
 fn plain_text(s: &str) -> IResult<&str, Box<dyn MessagePart> > {
     map(
@@ -218,7 +260,7 @@ pub fn message_parts(s: &str) -> IResult<&str,Vec<Box<dyn MessagePart>>> {
             placeholder,
             simple_format,
             plural_format,
-            // select_format,
+            select_format,
             plain_text,
         ))
     )(s)
@@ -302,11 +344,16 @@ mod tests {
         }
     }
 
-    // #[test]
-    // fn select_format_works() {
-    //     match message_parser("{type,select}") {
-    //         IResult::Done(_, _) => {}
-    //         _ => panic!("Expected successful parse."),
-    //     }
-    // }
+    #[test]
+    fn select_format_works() {
+        match message_parser("{gender, select, male {He} female {She} other {They}} will respond shortly.") {
+            Ok((_, fmt)) => {
+                println!("fmt = {:?}", fmt);
+                let ctx = Context::default();
+                let out = ctx.format(&fmt, &arg("gender", "female"));
+                println!("out = {}", out);
+            }
+            _ => panic!("Expected successful parse."),
+        }
+    }
 }
