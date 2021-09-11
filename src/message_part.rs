@@ -4,7 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::fmt;
+use std::{any::Any, fmt};
 
 use {Args, Context};
 
@@ -18,4 +18,5 @@ pub trait MessagePart: fmt::Debug {
         stream: &mut dyn fmt::Write,
         args: &'f dyn Args<'f>,
     ) -> fmt::Result;
+    fn as_any(&self) -> &dyn Any;
 }

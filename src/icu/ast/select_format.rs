@@ -69,6 +69,9 @@ impl MessagePart for SelectFormat {
             Err(fmt::Error {})
         }
     }
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 #[cfg(test)]

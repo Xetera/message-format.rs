@@ -35,6 +35,9 @@ impl MessagePart for PlainText {
         stream.write_str(self.text.as_str())?;
         Ok(())
     }
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 #[cfg(test)]
