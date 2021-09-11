@@ -48,6 +48,6 @@
 //! [ICU-style message formatting]: http://userguide.icu-project.org/formatparse/messages
 
 pub mod ast;
-mod parse;
+pub mod parse;
 
 pub use self::parse::parse;

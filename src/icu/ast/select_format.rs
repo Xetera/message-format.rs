@@ -9,7 +9,7 @@ use std::fmt;
 use {Args, Context, Message, MessagePart, Value};
 
 #[derive(Debug)]
-struct SelectMapping {
+pub struct SelectMapping {
     value: String,
     message: Message,
 }
@@ -18,9 +18,9 @@ struct SelectMapping {
 #[derive(Debug)]
 pub struct SelectFormat {
     /// The name of the variable whose value should be formatted.
-    variable_name: String,
+    pub variable_name: String,
     /// Given a value of a variable, this maps that to a message format.
-    mappings: Vec<SelectMapping>,
+    pub mappings: Vec<SelectMapping>,
     /// The message format to use if no valid mapping is found for
     /// the variable value.
     default: Message,
@@ -73,8 +73,8 @@ impl MessagePart for SelectFormat {
 
 #[cfg(test)]
 mod tests {
-    use icu::parse;
     use super::SelectFormat;
+    use icu::parse;
     use {Context, Message};
 
     #[test]

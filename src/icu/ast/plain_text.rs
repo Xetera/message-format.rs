@@ -13,7 +13,7 @@ use {Args, Context, MessagePart};
 #[derive(Debug, PartialEq)]
 pub struct PlainText {
     /// The text that should be output.
-    text: String,
+    pub text: String,
 }
 
 impl PlainText {

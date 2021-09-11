@@ -10,7 +10,7 @@ use english_cardinal_classifier;
 use {Args, Context, Message, MessagePart, PluralCategory, Value};
 
 #[derive(Debug)]
-struct PluralMapping {
+pub struct PluralMapping {
     value: i64,
     message: Message,
 }
@@ -19,7 +19,7 @@ struct PluralMapping {
 #[derive(Debug)]
 pub struct PluralFormat {
     /// The name of the variable whose value should be formatted.
-    variable_name: String,
+    pub variable_name: String,
     classifier: fn(i64) -> PluralCategory,
     literals: Vec<PluralMapping>,
     offset: i64,
@@ -88,7 +88,8 @@ impl PluralFormat {
 
     /// Given a value adjusted by the `offset`, determine which `Message` to use.
     fn lookup_message(&self, offset_value: i64) -> &Message {
-        if let Some(literal_message) = self.literals
+        if let Some(literal_message) = self
+            .literals
             .iter()
             .find(|mapping| mapping.value == offset_value)
             .map(|mapping| &mapping.message)
@@ -132,8 +133,8 @@ impl MessagePart for PluralFormat {
 
 #[cfg(test)]
 mod tests {
-    use icu::parse;
     use super::PluralFormat;
+    use icu::parse;
     use {Context, Message};
 
     #[test]

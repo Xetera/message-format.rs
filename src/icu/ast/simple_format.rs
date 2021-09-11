@@ -12,7 +12,7 @@ use {Args, Context, MessagePart};
 #[derive(Debug)]
 pub struct SimpleFormat {
     /// The name of the variable whose value should be formatted.
-    variable_name: String,
+    pub variable_name: String,
 }
 
 impl SimpleFormat {

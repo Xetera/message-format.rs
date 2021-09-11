@@ -185,6 +185,7 @@ pub use self::message_part::MessagePart;
 pub use self::plural_category::PluralCategory;
 pub use self::plural_classifiers::*;
 pub use self::value::Value;
+pub use self::icu::*;
 
 #[macro_export]
 macro_rules! format_message {
