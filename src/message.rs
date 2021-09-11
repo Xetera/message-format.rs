@@ -18,7 +18,7 @@ use {Args, Context, MessagePart};
 /// [`icu::parse`]: icu/fn.parse.html
 #[derive(Debug)]
 pub struct Message {
-    parts: Vec<Box<dyn MessagePart>>,
+    pub parts: Vec<Box<dyn MessagePart>>,
 }
 
 impl Message {

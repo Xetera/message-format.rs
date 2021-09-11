@@ -20,15 +20,15 @@ pub struct PluralMapping {
 pub struct PluralFormat {
     /// The name of the variable whose value should be formatted.
     pub variable_name: String,
-    classifier: fn(i64) -> PluralCategory,
-    literals: Vec<PluralMapping>,
-    offset: i64,
-    zero: Option<Message>,
-    one: Option<Message>,
-    two: Option<Message>,
-    few: Option<Message>,
-    many: Option<Message>,
-    other: Message,
+    pub classifier: fn(i64) -> PluralCategory,
+    pub literals: Vec<PluralMapping>,
+    pub offset: i64,
+    pub zero: Option<Message>,
+    pub one: Option<Message>,
+    pub two: Option<Message>,
+    pub few: Option<Message>,
+    pub many: Option<Message>,
+    pub other: Message,
 }
 
 impl PluralFormat {
