@@ -11,8 +11,8 @@ use {Args, Context, Message, MessagePart, PluralCategory, Value};
 
 #[derive(Debug)]
 pub struct PluralMapping {
-    value: i64,
-    message: Message,
+    pub value: i64,
+    pub message: Message,
 }
 
 /// Format a value taking pluralization rules into account.
