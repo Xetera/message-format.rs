@@ -218,18 +218,17 @@ fn select_inner(s: &str) -> IResult<&str, Box<dyn MessagePart>> {
 fn select_from_parts(variable_name: &str, mut parts: Vec<(&str, Message)>) -> ast::SelectFormat {
     let other_part_pos = parts.iter().position(|(n,_)| *n == "other");
 
-    if let Some(other_part_pos) = other_part_pos {
+    let mut fmt = if let Some(other_part_pos) = other_part_pos {
         let (_,other_part) = parts.remove(other_part_pos);
-        let mut fmt = ast::SelectFormat::new(variable_name, other_part);
-
-        for (s,p) in parts {
-            fmt.map(s, p);
-        }
-
-        fmt
+        ast::SelectFormat::new(variable_name, other_part)
     } else {
-        panic!("no other part found for select")
+        ast::SelectFormat::new(variable_name, Message::default())
+    };
+    for (s,p) in parts {
+        fmt.map(s, p);
     }
+
+    fmt
 }
 
 fn select_format(s: &str) -> IResult<&str, Box<dyn MessagePart>> {

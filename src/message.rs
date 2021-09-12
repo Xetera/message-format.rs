@@ -21,6 +21,12 @@ pub struct Message {
     pub parts: Vec<Box<dyn MessagePart>>,
 }
 
+impl Default for Message {
+    fn default() -> Self {
+        Self { parts: vec![] }
+    }
+}
+
 impl Message {
     /// Construct a message from constituent parts.
     pub fn new(parts: Vec<Box<dyn MessagePart>>) -> Self {
