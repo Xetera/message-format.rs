@@ -10,8 +10,8 @@ use {Args, Context, Message, MessagePart, Value};
 
 #[derive(Debug)]
 pub struct SelectMapping {
-    value: String,
-    message: Message,
+    pub value: String,
+    pub message: Message,
 }
 
 /// Using a value, select the appropriate message and format it.
